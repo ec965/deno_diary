@@ -14,4 +14,10 @@ export class Page extends Model {
   };
 }
 
+export interface PageModel {
+  id?: number;
+  title?: string;
+  body?: string;
+}
+
 db.link([Page]);

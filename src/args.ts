@@ -47,11 +47,13 @@ async function getOption(args: RawArgs, option: Option): Promise<ParsedArg> {
   const value = (args[name] || (alias && args[alias]) || option.default) as
     | string
     | number;
-  if (!value && required) throw new Error(`Option '${option.name}' was not found!`);
+  if (!value && required) {
+    throw new Error(`Option '${option.name}' was not found!`);
+  }
   return { name, value };
 }
 
-export async function parseArgs(
+async function parseArgs(
   ...options: Option[]
 ): Promise<Record<string, string | number>> {
   const rawArgs = parse(Deno.args);
@@ -65,3 +67,21 @@ export async function parseArgs(
     {},
   );
 }
+
+interface Args {
+  file: string;
+  port: number;
+}
+
+export const { file, port } = (await parseArgs(
+  {
+    name: "file",
+    alias: "f",
+    default: "README.md",
+  },
+  {
+    name: "port",
+    alias: "p",
+    default: 8080,
+  },
+)) as unknown as Args;
