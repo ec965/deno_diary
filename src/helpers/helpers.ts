@@ -17,10 +17,11 @@ export const matchCreateName = (filename: string): boolean =>
 export const printPageData = (pageData: PageModel[]) =>
   pageData.forEach(({ id, title, createdAt, updatedAt }) =>
     console.log(
-      `${id} | ${title} | created: ${
-        dateFmt(
-          createdAt as string,
-        )
-      } | updated: ${dateFmt(updatedAt as string)}`,
+      `${id} | ${title} | created: ${dateFmt(
+        createdAt as string
+      )} | updated: ${dateFmt(updatedAt as string)}`
     )
   );
+
+export const removeExtension = (filename: string) =>
+  filename.replace(/\.[^/.]+$/, "");

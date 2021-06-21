@@ -38,6 +38,7 @@ export interface Option {
   required?: boolean;
   default?: string | number | boolean;
   type: "string" | "boolean" | "number";
+  description?: string;
 }
 
 export type ArgOutput = Record<string, string | number | boolean>;
@@ -46,6 +47,7 @@ export interface Command {
   name: string;
   options: Option[];
   fn: <T extends ArgOutput>(args: T) => void;
+  description?: string;
 }
 
 /**
@@ -58,7 +60,7 @@ function verifyOption(args: RawArgs, option: Option): VerifiedOption | null {
   const { name, alias, required } = option;
 
   if (args[name] || (alias && args[alias])) {
-    const value = (args[name] || (alias && args[alias]) || option.default) as
+    let value = (args[name] || (alias && args[alias]) || option.default) as
       | string
       | boolean
       | number
@@ -70,16 +72,21 @@ function verifyOption(args: RawArgs, option: Option): VerifiedOption | null {
 
     // check type
     if (typeof value !== option.type) {
-      throw new Error(
-        `Option '${option.name}' expected '${option.type}' but had type '${typeof value}'`,
-      );
+      // go to default if type mismatch
+      if (option.default) value = option.default;
+      else
+        throw new Error(
+          `Option '${option.name}' expected '${
+            option.type
+          }' but had type '${typeof value}'`
+        );
     }
 
     return { name, value };
   }
   // check required
   if (required) {
-    throw new Error(`Required option ${option.name} was not found!`);
+    throw new Error(`Required option '${option.name}' was not found!`);
   }
   // otherwise
   return null;
@@ -102,10 +109,33 @@ function parseOptions(rawArgs: RawArgs, options: Option[]): ArgOutput {
   }, {});
 }
 
+export function explainOption(option: Option) {
+  const { name, alias, required, description } = option;
+  console.log(
+    `    -${alias}, --${name}${required ? " [required]" : ""}${
+      option.default ? ` [default: ${option.default}]` : ""
+    }${description ? `: ${description}` : ""}`
+  );
+}
+
+export function explainCommand({ name, options, description }: Command) {
+  console.log(`${name}${description ? `\n${description}` : ""}`);
+  options.forEach(explainOption);
+}
+
 export function argsEntry(commands: Command[]) {
   const rawArgs = parse(Deno.args);
   const command = commands.filter((cmd) => cmd.name === rawArgs._[0]).pop();
-  if (!command) throw new Error("No valid command found");
-  const parsedArgs = parseOptions(rawArgs, command.options);
-  return command.fn(parsedArgs);
+  if (!command) {
+    commands.forEach(explainCommand);
+    console.error("No valid command found");
+    return;
+  }
+  try {
+    const parsedArgs = parseOptions(rawArgs, command.options);
+    return command.fn(parsedArgs);
+  } catch (error) {
+    explainCommand(command);
+    console.error(error.message);
+  }
 }
