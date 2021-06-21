@@ -37,3 +37,5 @@ Options:
 ### **`list`**: List files in the database
 
 - `-d`, `--date`: Only show files after this date.
+
+### **`update`**: TODO
