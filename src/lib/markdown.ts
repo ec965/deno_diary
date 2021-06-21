@@ -16,8 +16,8 @@ export class Markdown {
 
   /**
    * parse markdown string into html
-   * @param text 
-   * @returns 
+   * @param text
+   * @returns
    */
   read(text: string): string {
     return this.css + Marked.parse(text).content;
@@ -25,8 +25,8 @@ export class Markdown {
 
   /**
    * parse markdown file into html
-   * @param filename 
-   * @returns 
+   * @param filename
+   * @returns
    */
   readFile(filename: string): string {
     const text = Deno.readTextFileSync(filename);

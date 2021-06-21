@@ -74,12 +74,11 @@ function verifyOption(args: RawArgs, option: Option): VerifiedOption | null {
     if (typeof value !== option.type) {
       // go to default if type mismatch
       if (option.default) value = option.default;
-      else
+      else {
         throw new Error(
-          `Option '${option.name}' expected '${
-            option.type
-          }' but had type '${typeof value}'`
+          `Option '${option.name}' expected '${option.type}' but had type '${typeof value}'`,
         );
+      }
     }
 
     return { name, value };
@@ -111,20 +110,20 @@ function parseOptions(rawArgs: RawArgs, options: Option[]): ArgOutput {
 
 /**
  * print explaination for option
- * @param option 
+ * @param option
  */
 export function explainOption(option: Option) {
   const { name, alias, required, description } = option;
   console.log(
     `    -${alias}, --${name}${required ? " [required]" : ""}${
       option.default ? ` [default: ${option.default}]` : ""
-    }${description ? `: ${description}` : ""}`
+    }${description ? `: ${description}` : ""}`,
   );
 }
 
 /**
  * print explanation for command
- * @param command 
+ * @param command
  */
 export function explainCommand(command: Command) {
   const { name, options, description } = command;
@@ -135,7 +134,7 @@ export function explainCommand(command: Command) {
 /**
  * Entry point for arg parser
  * @param commands array of commands to parse for
- * @returns 
+ * @returns
  */
 export function argsEntry(commands: Command[]) {
   const rawArgs = parse(Deno.args);

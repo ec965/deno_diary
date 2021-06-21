@@ -54,9 +54,11 @@ try {
           const { id, title, body, updatedAt } = result[0];
           const filePath = join(
             workDir,
-            `${id}==${title?.replace(" ", "_")}==${dateFmt(
-              updatedAt as string
-            )}.md`
+            `${id}==${title?.replace(" ", "_")}==${
+              dateFmt(
+                updatedAt as string,
+              )
+            }.md`,
           );
 
           await Deno.writeTextFile(filePath, `${body}`);
@@ -91,10 +93,12 @@ try {
 
         const dir = args.dir as string | undefined;
         const file = args.file as string | undefined;
-        if (!dir && !file)
+        if (!dir && !file) {
           throw new Error("Please specify a directory or file name");
-        if (dir && file)
+        }
+        if (dir && file) {
           throw new Error("Please only specifiy one of directory or file name");
+        }
         if (dir) {
           const validFiles = [];
 
@@ -150,12 +154,12 @@ try {
         await db.sync();
         const pageData = args.date
           ? ((await Page.select(...queryFields)
-              .where(
-                "updated_at",
-                ">",
-                new Date(args.date as string).toISOString()
-              )
-              .all()) as PageModel[])
+            .where(
+              "updated_at",
+              ">",
+              new Date(args.date as string).toISOString(),
+            )
+            .all()) as PageModel[])
           : ((await Page.select(...queryFields).all()) as PageModel[]);
         await db.close();
 
