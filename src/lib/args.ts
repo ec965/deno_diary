@@ -109,6 +109,10 @@ function parseOptions(rawArgs: RawArgs, options: Option[]): ArgOutput {
   }, {});
 }
 
+/**
+ * print explaination for option
+ * @param option 
+ */
 export function explainOption(option: Option) {
   const { name, alias, required, description } = option;
   console.log(
@@ -118,11 +122,21 @@ export function explainOption(option: Option) {
   );
 }
 
-export function explainCommand({ name, options, description }: Command) {
+/**
+ * print explanation for command
+ * @param command 
+ */
+export function explainCommand(command: Command) {
+  const { name, options, description } = command;
   console.log(`${name}${description ? `\n${description}` : ""}`);
   options.forEach(explainOption);
 }
 
+/**
+ * Entry point for arg parser
+ * @param commands array of commands to parse for
+ * @returns 
+ */
 export function argsEntry(commands: Command[]) {
   const rawArgs = parse(Deno.args);
   const command = commands.filter((cmd) => cmd.name === rawArgs._[0]).pop();
