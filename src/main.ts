@@ -45,27 +45,26 @@ try {
       ],
       fn: async (args) => {
         await db.sync();
-
         const result = (await Page.select("id", "title", "body", "updated_at")
           .where("id", args.id)
           .all()) as PageModel[];
-
-        if (result.length > 0) {
-          const { id, title, body, updatedAt } = result[0];
-          const filePath = join(
-            workDir,
-            `${id}==${title?.replace(" ", "_")}==${
-              dateFmt(
-                updatedAt as string,
-              )
-            }.md`,
-          );
-
-          await Deno.writeTextFile(filePath, `${body}`);
-        } else {
-          console.log(`Could not find page with id: ${args.id}`);
-        }
         await db.close();
+
+        if (result.length === 0) {
+          throw new Error(`Could not find page with id: ${args.id}`);
+        }
+
+        const { id, title, body, updatedAt } = result[0];
+        const filePath = join(
+          workDir,
+          `${id}==${title?.replace(" ", "_")}==${
+            dateFmt(
+              updatedAt as string,
+            )
+          }.md`,
+        );
+
+        await Deno.writeTextFile(filePath, body ?? "");
       },
     },
     {
@@ -93,21 +92,19 @@ try {
 
         const dir = args.dir as string | undefined;
         const file = args.file as string | undefined;
+
         if (!dir && !file) {
           throw new Error("Please specify a directory or file name");
         }
         if (dir && file) {
           throw new Error("Please only specifiy one of directory or file name");
         }
-        if (dir) {
-          const validFiles = [];
 
+        if (dir) {
           // read files and choose files that match naming convention
-          for await (const file of Deno.readDir(dir)) {
-            if (file.isFile && matchCreateName(file.name)) {
-              validFiles.push(file.name);
-            }
-          }
+          const validFiles = Array.from(Deno.readDirSync(dir))
+            .filter(({ isFile, name }) => isFile && matchCreateName(name))
+            .map(({ name }) => name);
 
           if (validFiles.length === 0) return;
 
@@ -127,12 +124,12 @@ try {
           });
         }
         if (file) {
-          if (await exists(file)) {
-            await db.sync();
-            const results = await Page.create(readAndShapePage(file));
-            console.log(results);
-            await db.close();
-          } else throw new Error("File does not exist");
+          if (!(await exists(file))) throw new Error("File does not exist");
+
+          await db.sync();
+          const results = await Page.create(readAndShapePage(file));
+          console.log(results);
+          await db.close();
         }
       },
     },
@@ -149,16 +146,17 @@ try {
       ],
       fn: async (args) => {
         const queryFields = ["id", "title", "created_at", "updated_at"];
+        const dateQuery = [
+          "updated_at",
+          ">",
+          new Date(args.date as string).toISOString(),
+        ];
 
         // query db
         await db.sync();
         const pageData = args.date
           ? ((await Page.select(...queryFields)
-            .where(
-              "updated_at",
-              ">",
-              new Date(args.date as string).toISOString(),
-            )
+            .where(...dateQuery)
             .all()) as PageModel[])
           : ((await Page.select(...queryFields).all()) as PageModel[]);
         await db.close();

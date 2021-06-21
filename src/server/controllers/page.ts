@@ -1,6 +1,6 @@
 import { Page, PageModel } from "server/models/page.ts";
 import { Markdown } from "lib/markdown.ts";
-import { existsSync } from "std/fs/mod.ts";
+import { exists } from "std/fs/mod.ts";
 import { RouteParams, RouterContext, Status } from "oak/mod.ts";
 
 const md = new Markdown("./style.css");
@@ -23,7 +23,8 @@ export async function getPageById(ctx: RouterContext<RouteParams>) {
 }
 
 export const getMdFile = (filename: string) =>
-  (ctx: RouterContext) => {
+  async (ctx: RouterContext) => {
+    if (!(await exists(filename))) ctx.throw(Status.NotFound, "File not found");
     ctx.response.body = md.readFile(filename);
     ctx.response.type = "html";
   };
@@ -34,8 +35,5 @@ export async function getMdFileParam(ctx: RouterContext) {
     ctx.throw(Status.BadRequest, "Request is missing 'filename' parameter");
   }
 
-  if (!existsSync(filename)) ctx.throw(Status.NotFound, "File not found");
-
-  ctx.response.body = await md.readFile(filename);
-  ctx.response.type = "html";
+  await getMdFile(filename)(ctx);
 }
