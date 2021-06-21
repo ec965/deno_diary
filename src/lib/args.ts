@@ -1,7 +1,7 @@
 // arg lib
 import { Args as RawArgs, parse } from "std/flags/mod.ts";
 
-interface VerifiedOption {
+export interface VerifiedOption {
   name: string;
   value: string | number | boolean;
 }
@@ -56,58 +56,56 @@ export interface Command {
  * @param option option to verify
  * @returns verified option
  */
-function verifyOption(args: RawArgs, option: Option): VerifiedOption | null {
-  const { name, alias, required } = option;
+export const verifyOption =
+  (args: RawArgs) =>
+  (option: Option): VerifiedOption | null => {
+    const { name, alias, required } = option;
 
-  if (args[name] || (alias && args[alias])) {
-    let value = (args[name] || (alias && args[alias]) || option.default) as
-      | string
-      | boolean
-      | number
-      | undefined;
-    // apply default
-    if (typeof value === "undefined") {
-      throw new Error(`Value for option '${option.name}' was not found!`);
+    if (
+      typeof args[name] !== "undefined" ||
+      (alias && typeof args[alias] !== "undefined")
+    ) {
+      // assign a value to whichever arg exists
+      // prioritize name over alias
+      const value = (args[name] || (alias && args[alias])) as
+        | string
+        | boolean
+        | number;
+
+      // check type
+      const type = typeof value;
+      if (type === option.type) return { name, value };
+      // if type mismatch is boolean and default is specified
+      if (type === "boolean" && typeof option.default !== "undefined")
+        return { name, value: option.default };
+
+      throw new Error(
+        `Option '${option.name}' expected '${
+          option.type
+        }' but had type '${typeof value}'`
+      );
     }
+    // check required
+    if (required)
+      throw new Error(`Required option '${option.name}' was not found!`);
 
-    // check type
-    const type = typeof value;
-    if (type !== option.type) {
-      // go to default if type mismatch
-      if (option.default) value = option.default;
-      else {
-        throw new Error(
-          `Option '${option.name}' expected '${option.type}' but had type '${typeof value}'`,
-        );
-      }
-    }
-
-    return { name, value };
-  }
-  // check required
-  if (required) {
-    throw new Error(`Required option '${option.name}' was not found!`);
-  }
-  // otherwise
-  return null;
-}
+    // if arg not found and not required
+    return null;
+  };
 
 /**
- *
+ * check that all options are there
  * @param options options to parse
  * @returns argument output of verified options
  */
-function parseOptions(rawArgs: RawArgs, options: Option[]): ArgOutput {
-  // check that all options are there
-  const args = options
-    .map((option) => verifyOption(rawArgs, option))
-    .filter((option): option is VerifiedOption => option !== null);
-
-  return args.reduce((obj: ArgOutput, { name, value }) => {
-    obj[name] = value;
-    return obj;
-  }, {});
-}
+export const parseOptions = (rawArgs: RawArgs, options: Option[]): ArgOutput =>
+  options
+    .map(verifyOption(rawArgs))
+    .filter((option): option is VerifiedOption => option !== null)
+    .reduce((obj: ArgOutput, { name, value }) => {
+      obj[name] = value;
+      return obj;
+    }, {});
 
 /**
  * print explaination for option
@@ -118,7 +116,7 @@ export function explainOption(option: Option) {
   console.log(
     `    -${alias}, --${name}${required ? " [required]" : ""}${
       option.default ? ` [default: ${option.default}]` : ""
-    }${description ? `: ${description}` : ""}`,
+    }${description ? `: ${description}` : ""}`
   );
 }
 
@@ -140,6 +138,7 @@ export function explainCommand(command: Command) {
 export function argsEntry(commands: Command[]) {
   const rawArgs = parse(Deno.args);
   const command = commands.filter((cmd) => cmd.name === rawArgs._[0]).pop();
+  // print help if no command input
   if (!command) {
     commands.forEach(explainCommand);
     console.error("No valid command found");
@@ -149,6 +148,7 @@ export function argsEntry(commands: Command[]) {
     const parsedArgs = parseOptions(rawArgs, command.options);
     return command.fn(parsedArgs);
   } catch (error) {
+    // print help if invalid options
     explainCommand(command);
     console.error(error.message);
   }

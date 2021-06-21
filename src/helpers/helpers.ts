@@ -14,7 +14,7 @@ export const dateFmt = (date: string): string =>
  * @returns
  */
 export const matchReadUpdateName = (filename: string): boolean =>
-  Boolean(filename.match(/([0-9]+)==([a-zA-Z0-9_]+)==(.*)/));
+  Boolean(filename.match(/([0-9]+)==([a-zA-Z0-9_]+)==(.*)\.md$/));
 
 /**
  * Ensure that the filename is not the README, a read/update name type, and is a .md file
