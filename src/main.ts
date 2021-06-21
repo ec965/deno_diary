@@ -1,47 +1,41 @@
-import { Application, isHttpError } from "https://deno.land/x/oak/mod.ts";
-import { port } from "./args.ts";
-import { db } from "./db.ts";
-import { Page } from "./models/page.ts";
-import { pageRouter } from "./routes/page.ts";
-
-try {
-  // connect to db
-  await db.sync({ drop: true });
-
-  await Page.create({
-    title: "test title",
-    body: new TextDecoder("utf-8").decode(Deno.readFileSync("test.md")),
-  });
-
-  const app = new Application();
-
-  // error handler
-  app.use(async (ctx, next) => {
-    try {
-      await next();
-    } catch (error) {
-      if (isHttpError(error)) {
-        ctx.response.status = error.status;
-        ctx.response.type = "json";
-        ctx.response.body = { error: error.message };
-      } else {
-        throw error;
-      }
-    }
-  });
-
-  // configure routes
-  app.use(pageRouter.routes());
-  app.use(pageRouter.allowedMethods());
-
-  app.addEventListener("listen", ({ hostname, port, secure }) => {
-    const url = `${secure ? "https://" : "http://"}${hostname ??
-      "localhost"}:${port}`;
-    console.log(`Serving on: ${url}`);
-  });
-
-  await app.listen({ port: port });
-
-} catch (error) {
-  console.error(error);
+import { ArgOutput, Option, argsEntry } from "./args.ts";
+import { runApp } from './app.ts';
+interface ServeArgs extends ArgOutput {
+  ["file"]: string;
+  ["port"]: number;
 }
+
+interface CRUDArgs extends ArgOutput {
+  file: string;
+}
+
+const options = {
+  file: {
+    name: "file",
+    alias: "f",
+    default: "README.md",
+    type: "string"
+  } as Option,
+  port: {
+    name: "port",
+    alias: "p",
+    default: 8080,
+    type: "number",
+  } as Option,
+} as const;
+
+argsEntry([
+  {
+    name: "serve",
+    options: [options.file, options.port],
+    fn:(args) => {
+      const { port, file } = args;
+      runApp(port as number, file as string);
+    },
+  },
+  {
+    name: "read",
+    options: [options.file],
+    fn: (args) => console.log(args),
+  },
+]);

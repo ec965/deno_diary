@@ -1,9 +1,12 @@
 import { getMdFile, getPageById } from "../controllers/page.ts";
 import { Router } from "https://deno.land/x/oak/mod.ts";
-import { file } from "../args.ts";
 
-// pageRouter
-export const pageRouter = new Router();
+export const createPageRouter = (filename: string) => {
+  // router
+  const router = new Router();
 
-pageRouter.get("/:id", getPageById);
-pageRouter.get("/", getMdFile(file));
+  router.get("/", getMdFile("README.md"));
+  router.get("/file", getMdFile(filename));
+  router.get("/id/:id", getPageById);
+  return router;
+};
