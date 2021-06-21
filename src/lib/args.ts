@@ -1,8 +1,5 @@
 // arg lib
-import {
-  Args as RawArgs,
-  parse,
-} from "flags/mod.ts";
+import { Args as RawArgs, parse } from "std/flags/mod.ts";
 
 interface VerifiedOption {
   name: string;
@@ -39,7 +36,7 @@ export interface Option {
     | "y"
     | "z";
   required?: boolean;
-  default?: string | number;
+  default?: string | number | boolean;
   type: "string" | "boolean" | "number";
 }
 
@@ -57,21 +54,35 @@ export interface Command {
  * @param option option to verify
  * @returns verified option
  */
-function verifyOption(args: RawArgs, option: Option): VerifiedOption {
+function verifyOption(args: RawArgs, option: Option): VerifiedOption | null {
   const { name, alias, required } = option;
-  const value = (args[name] || (alias && args[alias]) || option.default) as
-    | string
-    | boolean
-    | number;
-  if (!value && required) {
-    throw new Error(`Option '${option.name}' was not found!`);
+
+  if (args[name] || (alias && args[alias])) {
+    const value = (args[name] || (alias && args[alias]) || option.default) as
+      | string
+      | boolean
+      | number
+      | undefined;
+    // apply default
+    if (typeof value === "undefined") {
+      throw new Error(`Value for option '${option.name}' was not found!`);
+    }
+
+    // check type
+    if (typeof value !== option.type) {
+      throw new Error(
+        `Option '${option.name}' expected '${option.type}' but had type '${typeof value}'`,
+      );
+    }
+
+    return { name, value };
   }
-  if (typeof value !== option.type) {
-    throw new Error(
-      `Option '${option.name} expected '${option.type}' but had type '${typeof value}'`,
-    );
+  // check required
+  if (required) {
+    throw new Error(`Required option ${option.name} was not found!`);
   }
-  return { name, value };
+  // otherwise
+  return null;
 }
 
 /**
@@ -81,7 +92,10 @@ function verifyOption(args: RawArgs, option: Option): VerifiedOption {
  */
 function parseOptions(rawArgs: RawArgs, options: Option[]): ArgOutput {
   // check that all options are there
-  const args = options.map((option) => verifyOption(rawArgs, option));
+  const args = options
+    .map((option) => verifyOption(rawArgs, option))
+    .filter((option): option is VerifiedOption => option !== null);
+
   return args.reduce((obj: ArgOutput, { name, value }) => {
     obj[name] = value;
     return obj;

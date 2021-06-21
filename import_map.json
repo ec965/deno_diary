@@ -1,9 +1,12 @@
 {
   "imports": {
-    "oak/": "https://deno.land/x/oak/",
-    "denodb/": "https://deno.land/x/denodb/",
+    "oak/": "https://deno.land/x/oak@v7.6.2/",
+    "denodb/": "https://deno.land/x/denodb@v1.0.38/",
     "markdown/": "https://deno.land/x/markdown@v2.0.0/",
-    "flags/": "https://deno.land/std@0.99.0/flags/",
-    "fs/": "https://deno.land/std@0.99.0/fs/"
+    "std/": "https://deno.land/std@0.99.0/",
+    "src/": "./src/",
+    "server/": "./src/server/",
+    "lib/": "./src/lib/",
+    "helpers/": "./src/helpers/"
   }
 }
