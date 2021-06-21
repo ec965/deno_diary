@@ -22,8 +22,7 @@ export async function runApp(port: number, filename: string) {
       } catch (error) {
         if (isHttpError(error)) {
           ctx.response.status = error.status;
-          ctx.response.type = "json";
-          ctx.response.body = { error: error.message };
+          ctx.response.body = error.message;
         } else {
           throw error;
         }
@@ -36,13 +35,12 @@ export async function runApp(port: number, filename: string) {
     app.use(pageRouter.allowedMethods());
 
     app.addEventListener("listen", ({ hostname, port, secure }) => {
-      const url = `${secure ? "https://" : "http://"}${
-        hostname ?? "localhost"
-      }:${port}`;
+      const url = `${secure ? "https://" : "http://"}${hostname ??
+        "localhost"}:${port}`;
       console.log(`Serving on: ${url}`);
     });
 
-    await app.listen({ port: port});
+    await app.listen({ port: port });
   } catch (error) {
     console.error(error);
   }

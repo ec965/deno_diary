@@ -1,5 +1,5 @@
-import { ArgOutput, Option, argsEntry } from "./args.ts";
-import { runApp } from './app.ts';
+import { ArgOutput, argsEntry, Option } from "./args.ts";
+import { runApp } from "./app.ts";
 interface ServeArgs extends ArgOutput {
   ["file"]: string;
   ["port"]: number;
@@ -14,7 +14,7 @@ const options = {
     name: "file",
     alias: "f",
     default: "README.md",
-    type: "string"
+    type: "string",
   } as Option,
   port: {
     name: "port",
@@ -28,7 +28,7 @@ argsEntry([
   {
     name: "serve",
     options: [options.file, options.port],
-    fn:(args) => {
+    fn: (args) => {
       const { port, file } = args;
       runApp(port as number, file as string);
     },

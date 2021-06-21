@@ -66,7 +66,11 @@ function verifyOption(args: RawArgs, option: Option): VerifiedOption {
   if (!value && required) {
     throw new Error(`Option '${option.name}' was not found!`);
   }
-  if(typeof value !== option.type) throw new Error(`Option '${option.name} expected '${option.type}' but had type '${typeof value}'`)
+  if (typeof value !== option.type) {
+    throw new Error(
+      `Option '${option.name} expected '${option.type}' but had type '${typeof value}'`,
+    );
+  }
   return { name, value };
 }
 
