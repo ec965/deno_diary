@@ -14,9 +14,5 @@ export default {
     test: `deno test ${opts}`,
     compile: `deno compile ${opts} --output ${out} ${entry}`,
     bundle: `deno bundle ${imap} ${other} ${entry} ${bundle}`,
-    "pre-commit": {
-      cmd: ["deno lint", "deno fmt"],
-      gitHook: "pre-commit",
-    },
   },
 };

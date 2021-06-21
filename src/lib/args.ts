@@ -56,8 +56,7 @@ export interface Command {
  * @param option option to verify
  * @returns verified option
  */
-export const verifyOption =
-  (args: RawArgs) =>
+export const verifyOption = (args: RawArgs) =>
   (option: Option): VerifiedOption | null => {
     const { name, alias, required } = option;
 
@@ -76,18 +75,18 @@ export const verifyOption =
       const type = typeof value;
       if (type === option.type) return { name, value };
       // if type mismatch is boolean and default is specified
-      if (type === "boolean" && typeof option.default !== "undefined")
+      if (type === "boolean" && typeof option.default !== "undefined") {
         return { name, value: option.default };
+      }
 
       throw new Error(
-        `Option '${option.name}' expected '${
-          option.type
-        }' but had type '${typeof value}'`
+        `Option '${option.name}' expected '${option.type}' but had type '${typeof value}'`,
       );
     }
     // check required
-    if (required)
+    if (required) {
       throw new Error(`Required option '${option.name}' was not found!`);
+    }
 
     // if arg not found and not required
     return null;
@@ -116,7 +115,7 @@ export function explainOption(option: Option) {
   console.log(
     `    -${alias}, --${name}${required ? " [required]" : ""}${
       option.default ? ` [default: ${option.default}]` : ""
-    }${description ? `: ${description}` : ""}`
+    }${description ? `: ${description}` : ""}`,
   );
 }
 

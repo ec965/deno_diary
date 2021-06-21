@@ -1,8 +1,8 @@
 import { assertEquals } from "std/testing/asserts.ts";
 import {
+  matchCreateName,
   matchReadUpdateName,
   removeExtension,
-  matchCreateName,
 } from "./helpers.ts";
 
 Deno.test("match create name - true", () => {

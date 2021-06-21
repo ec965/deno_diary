@@ -1,4 +1,4 @@
-import { verifyOption, Option, VerifiedOption } from "./args.ts";
+import { Option, VerifiedOption, verifyOption } from "./args.ts";
 import { assertEquals, assertThrows } from "std/testing/asserts.ts";
 
 Deno.test("verify option - found arg", () => {
@@ -58,7 +58,7 @@ Deno.test("verify option - use default", () => {
 });
 
 Deno.test("verify option - type mismatch", () => {
-  const rawArgs = { _: ["serve"], a: 123};
+  const rawArgs = { _: ["serve"], a: 123 };
 
   const apple: Option = {
     name: "apple",
