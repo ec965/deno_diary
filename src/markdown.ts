@@ -1,4 +1,4 @@
-import { Marked } from "https://deno.land/x/markdown@v2.0.0/mod.ts";
+import { Marked } from "markdown/mod.ts";
 
 export class Markdown {
   private decoder = new TextDecoder("utf-8");

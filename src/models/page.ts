@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "https://deno.land/x/denodb/mod.ts";
+import { DataTypes, Model } from "denodb/mod.ts";
 import { db } from "../db.ts";
 
 export class Page extends Model {

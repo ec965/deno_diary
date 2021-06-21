@@ -2,7 +2,7 @@
 import {
   Args as RawArgs,
   parse,
-} from "https://deno.land/std@0.99.0/flags/mod.ts";
+} from "flags/mod.ts";
 
 interface VerifiedOption {
   name: string;

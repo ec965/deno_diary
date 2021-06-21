@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "oak/": "https://deno.land/x/oak/",
+    "denodb/": "https://deno.land/x/denodb/",
+    "markdown/": "https://deno.land/x/markdown@v2.0.0/",
+    "flags/": "https://deno.land/std@0.99.0/flags/",
+    "fs/": "https://deno.land/std@0.99.0/fs/"
+  }
+}

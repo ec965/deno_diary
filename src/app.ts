@@ -1,4 +1,4 @@
-import { Application, isHttpError } from "https://deno.land/x/oak/mod.ts";
+import { Application, isHttpError } from "oak/mod.ts";
 import { db } from "./db.ts";
 import { Page } from "./models/page.ts";
 import { createPageRouter } from "./routes/page.ts";
@@ -23,6 +23,7 @@ export async function runApp(port: number, filename: string) {
         if (isHttpError(error)) {
           ctx.response.status = error.status;
           ctx.response.body = error.message;
+          ctx.response.type = "text";
         } else {
           throw error;
         }
@@ -34,11 +35,15 @@ export async function runApp(port: number, filename: string) {
     app.use(pageRouter.routes());
     app.use(pageRouter.allowedMethods());
 
+    // event listeners
     app.addEventListener("listen", ({ hostname, port, secure }) => {
-      const url = `${secure ? "https://" : "http://"}${hostname ??
-        "localhost"}:${port}`;
+      const url = `${secure ? "https://" : "http://"}${
+        hostname ?? "localhost"
+      }:${port}`;
       console.log(`Serving on: ${url}`);
     });
+
+    app.addEventListener("error", (event) => console.error(event.error));
 
     await app.listen({ port: port });
   } catch (error) {

@@ -1,13 +1,5 @@
-import { ArgOutput, argsEntry, Option } from "./args.ts";
+import { argsEntry, Option } from "./args.ts";
 import { runApp } from "./app.ts";
-interface ServeArgs extends ArgOutput {
-  ["file"]: string;
-  ["port"]: number;
-}
-
-interface CRUDArgs extends ArgOutput {
-  file: string;
-}
 
 const options = {
   file: {
@@ -24,18 +16,22 @@ const options = {
   } as Option,
 } as const;
 
-argsEntry([
-  {
-    name: "serve",
-    options: [options.file, options.port],
-    fn: (args) => {
-      const { port, file } = args;
-      runApp(port as number, file as string);
+try {
+  argsEntry([
+    {
+      name: "serve",
+      options: [options.file, options.port],
+      fn: (args) => {
+        const { port, file } = args;
+        runApp(port as number, file as string);
+      },
     },
-  },
-  {
-    name: "read",
-    options: [options.file],
-    fn: (args) => console.log(args),
-  },
-]);
+    {
+      name: "read",
+      options: [options.file],
+      fn: (args) => console.log(args),
+    },
+  ]);
+} catch (error) {
+  console.error(error);
+}
