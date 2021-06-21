@@ -71,7 +71,8 @@ function verifyOption(args: RawArgs, option: Option): VerifiedOption | null {
     }
 
     // check type
-    if (typeof value !== option.type) {
+    const type = typeof value;
+    if (type !== option.type) {
       // go to default if type mismatch
       if (option.default) value = option.default;
       else {

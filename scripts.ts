@@ -1,3 +1,4 @@
+// vele
 const allow = "--allow-read --allow-net --allow-write";
 const imap = "--import-map=import_map.json";
 const other = "--unstable"; // needed for std@0.99.0 for now
@@ -10,5 +11,9 @@ export default {
     test: `deno test ${opts}`,
     compile: `deno compile ${opts} --output diary src/main.ts`,
     bundle: `deno bundle ${imap} ${other} src/main.ts main.bundle.ts`,
+    "pre-commit": {
+      cmd: ["deno lint", "deno fmt"],
+      gitHook: "pre-commit"
+    }
   },
 };
